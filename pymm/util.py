@@ -1,4 +1,4 @@
-def dict_to_list(d:dict):
+def dict_to_list(d:dict) -> list:
     res = []
     for (key, item) in d.items():
         is_dict = False
@@ -8,11 +8,11 @@ def dict_to_list(d:dict):
         res.append((key, is_dict, item))
     return res
 
-def tuple_to_dict(t:tuple):
+def list_to_dict(t:list) -> dict:
     res = {}
     for (key, is_dict, item) in t:
         if is_dict:
-            item = tuple_to_dict(item)
+            item = list_to_dict(item)
         res[key] = item
     return res
 
@@ -21,9 +21,9 @@ error_dict = {
     'get': (AttributeError, NameError),
     'index': LookupError,
     'reference': ('get', 'index'),
-    'value': (TypeError, ValueError),
-    'directory': (IsADirectoryError, NotADirectoryError),
-    'file': (FileExistsError, FileNotFoundError, PermissionError, 'directory'),
+    'value': (ValueError, TypeError),
+    'directory': (NotADirectoryError, IsADirectoryError),
+    'file': (FileNotFoundError, FileExistsError, 'directory'),
     'os': OSError,
 }
 
