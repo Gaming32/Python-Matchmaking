@@ -1,2 +1,2 @@
-from .launcher import start
-start(('', 12345))
+from .launcher import main
+main()

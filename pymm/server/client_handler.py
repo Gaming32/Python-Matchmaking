@@ -1,24 +1,36 @@
+import sys
 import _thread
 from netsc.server import Server, socket
 from netsc.struct import return2data
 from ..util import error_info, dict_to_list
+from .printer import print
 
 
 class _ClientHandler:
     def __init__(self, parent):
         self.parent = parent
-    def _test_errors(self, error=True, exit=False):
+        self.thread = _thread.get_ident()
+    def _verbose(self, *values, **kwargs):
+        if self.parent.verbose:
+            print(*values, **kwargs)
+    def disconnect(self):
+        self._verbose('client', self.parent.sock.getpeername(), 'disconecting...')
+        self.parent.sock.close()
+        self._verbose('thread', hex(self.thread), 'exited')
+        _thread.exit()
+        return False
+    def _test_errors(self, error=True):
         if error: raise ValueError('error raised')
-        if exit:
-            if self.parent.verbose:
-                print('thread exit')
-            _thread.exit()
         return 'done'
 
 class ClientHandler(Server):
-    def __init__(self, bind_addr=('', 0), sock_family=socket.AF_INET, sock_type=socket.SOCK_STREAM, sock_proto=0):
-        self.sock_family, self.sock_type, self.sock_proto, self.bind_addr = sock_family, sock_type, sock_proto, bind_addr
-        super().__init__(_ClientHandler(self))
+    def __init__(self, bind_addr=('', 0), sock_family=socket.AF_INET):
+        self.sock_family, self.bind_addr = sock_family, bind_addr
+        self.wrapped = _ClientHandler(self)
+        if sys.version_info >= (3, 8) and socket.has_dualstack_ipv6():
+            self.sock = socket.create_server(bind_addr, family=socket.AF_INET6, dualstack_ipv6=True)
+        else:
+            self.sock = socket.create_server(bind_addr, family=sock_family, dualstack_ipv6=False)
         self.verbose = False
     def poll(self):
         try: value = super().poll()
