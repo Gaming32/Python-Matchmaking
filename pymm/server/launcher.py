@@ -25,10 +25,10 @@ def input_loop(threads, addr=('', 0), backlog=0, family=socket.AF_INET):
                 sock.close()
         if do_exit: break
     server.close()
-    print('shutting down threads...')
-    exit_threads(force)
+    exit_threads(threads, force)
 
 def exit_threads(threads, force=False):
+    print('shutting down threads...')
     def print_users():
         print('waiting for the following users to disconnect:', end='')
         for (addr, thread) in threads:
@@ -37,15 +37,16 @@ def exit_threads(threads, force=False):
         while threads:
             print_users()
             time.sleep(0.5)
+    print('threads shut down')
     _thread.interrupt_main()
 
 def start(addr=('', 0), input_addr=('', 0), input_backlog=0, verbose=False):
     threads = []
-    input_loop(threads, input_addr, input_backlog)
+    _thread.start_new_thread(input_loop, (threads, input_addr, input_backlog))
     print('started succesfully')
     while True:
         handler = ClientHandler(addr)
-        print('accepting connection on %s...' % handler.sock.getsockname())
+        print('accepting connection on %s...' % (handler.sock.getsockname(),))
         newconn = handler.accept()
         thread_id = _thread.start_new_thread(client_poller, (handler, verbose))
         print(newconn, 'connected on thread', hex(thread_id))
