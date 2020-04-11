@@ -30,7 +30,8 @@ class ClientHandler(Server):
         if sys.version_info >= (3, 8) and socket.has_dualstack_ipv6():
             self.sock = socket.create_server(bind_addr, family=socket.AF_INET6, dualstack_ipv6=True)
         else:
-            self.sock = socket.create_server(bind_addr, family=sock_family, dualstack_ipv6=False)
+            self.sock = socket.socket(sock_family)
+            self.sock.bind(bind_addr)
         self.verbose = False
     def poll(self):
         try: value = super().poll()
