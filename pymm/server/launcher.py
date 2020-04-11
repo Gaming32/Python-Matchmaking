@@ -103,7 +103,7 @@ else:
     default_config_directory = '~/.pymm/config'
 default_config_directory_absolute = os.path.expandvars(os.path.expanduser(default_config_directory))
 
-argument_parser = argparse.ArgumentParser(prog='%s -m pymm.server' % get_python_path())
+argument_parser = argparse.ArgumentParser(prog='%s -m pymm.server' % shlex.quote(get_python_path()))
 argument_parser.add_argument('-~', '--prepare', action='store_true')
 argument_parser.add_argument('-c', '--config-directory', metavar='PATH', default=default_config_directory_absolute,
     help='Default value: %s' % default_config_directory.replace('%', '%%'))
