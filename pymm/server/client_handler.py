@@ -27,12 +27,14 @@ class ClientHandler(Server):
     def __init__(self, bind_addr=('', 0), sock_family=socket.AF_INET):
         self.sock_family, self.bind_addr = sock_family, bind_addr
         self.wrapped = _ClientHandler(self)
-        if sys.version_info >= (3, 8) and socket.has_dualstack_ipv6():
+        self.verbose = False
+        if bind_addr is None:
+            self.sock = None
+        elif sys.version_info >= (3, 8) and socket.has_dualstack_ipv6():
             self.sock = socket.create_server(bind_addr, family=socket.AF_INET6, dualstack_ipv6=True)
         else:
             self.sock = socket.socket(sock_family)
             self.sock.bind(bind_addr)
-        self.verbose = False
     def poll(self):
         try: value = super().poll()
         except Exception as e:
